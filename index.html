@@ -398,6 +398,7 @@
       .about-visual { padding: 30px; }
       .hero-trust { gap: 20px; }
     }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -671,7 +672,16 @@
           </div>
         </div>
 
-        <form class="contact-form reveal" id="contactForm" novalidate>
+        <form class="contact-form reveal" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+          <!-- Web3Forms Access Key -->
+          <input type="hidden" name="access_key" value="097175e9-1da8-4fd1-8512-8354185edc35" />
+          
+          <!-- Optional: Subject line for the email -->
+          <input type="hidden" name="subject" value="New Schosphere Contact Inquiry" />
+          
+          <!-- Optional: Prevent redirect to Web3Forms success page (handled by JS below) -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
           <div class="form-row">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" placeholder="Your full name" required />
@@ -848,14 +858,42 @@
     }, { threshold: 0.12 });
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-    // Contact form (static, no backend) — show success + reset
+    // Contact form with Web3Forms AJAX submission
     const form = document.getElementById('contactForm');
-    form.addEventListener('submit', (e) => {
+    const successMsg = document.getElementById('formSuccess');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!form.checkValidity()) { form.reportValidity(); return; }
-      document.getElementById('formSuccess').classList.add('show');
-      form.reset();
+
+      // Update button state
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i data-feather="loader" style="animation: spin 1s linear infinite;"></i> Sending...';
+      submitBtn.disabled = true;
       feather.replace();
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          successMsg.classList.add('show');
+          form.reset();
+        } else {
+          alert('Something went wrong. Please try again or email us directly.');
+        }
+      } catch (error) {
+        alert('Failed to send message. Please check your connection.');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        feather.replace();
+      }
     });
   </script>
 </body>
