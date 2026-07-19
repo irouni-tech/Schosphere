@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://irounitech.github.io/schosphere/sitemap.xml
+Sitemap: https://irouni-tech.github.io/schosphere/sitemap.xml
